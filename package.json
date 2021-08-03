@@ -25,6 +25,7 @@
     "discord.js": "github:discordjs/discord.js",
     "dotenv": "^10.0.0",
     "glob-promise": "^4.2.0",
+    "moment": "^2.29.1",
     "node-fetch": "^2.6.1"
   }
 }
