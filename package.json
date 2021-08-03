@@ -1,0 +1,26 @@
+{
+  "name": "konzu",
+  "version": "1.0.0",
+  "description": "Discord bot for Warframe",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node-dev --respawn index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FinOCE/Konzu.git"
+  },
+  "author": "FinOCE",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FinOCE/Konzu/issues"
+  },
+  "homepage": "https://github.com/FinOCE/Konzu#readme",
+  "devDependencies": {
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "discord.js": "github:discordjs/discord.js"
+  }
+}
