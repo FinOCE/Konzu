@@ -21,6 +21,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "discord.js": "github:discordjs/discord.js"
+    "discord.js": "github:discordjs/discord.js",
+    "dotenv": "^10.0.0",
+    "glob-promise": "^4.2.0"
   }
 }
