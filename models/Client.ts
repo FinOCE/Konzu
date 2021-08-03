@@ -9,12 +9,14 @@ import Button from './Button'
  * Create a client.
  */
 export default class Client extends DJSClient {
+    public config: Record<string, any>
     public commands: Collection<string, Command>
     public buttons: Collection<string, Button>
 
     constructor(options: ClientOptions) {
         super(options)
 
+        this.config = require('../config.json')
         this.commands = new Collection<string, Command>()
         this.buttons = new Collection<string, Button>()
 
@@ -54,7 +56,7 @@ export default class Client extends DJSClient {
             this.commands.set(name, command)
 
             let {description, options, permissions, defaultPermission} = command
-            this.guilds.cache.get(process.env.server!)?.commands.create({
+            this.guilds.cache.get(this.config.snowflakes.server)?.commands.create({
                 name,
                 description,
                 options,

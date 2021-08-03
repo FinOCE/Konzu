@@ -37,7 +37,7 @@ export default abstract class Command extends Interaction {
         this.defaultPermission = true
         this.permissions = []
 
-        let roles = this.client.guilds.cache.get(process.env.server!)?.roles.cache.filter(role => role.permissions.any(permissions)) ?? []
+        let roles = this.client.guilds.cache.get(this.client.config.snowflakes.server)?.roles.cache.filter(role => role.permissions.any(permissions)) ?? []
 
         for (let [name, role] of roles) {
             this.permissions.push({

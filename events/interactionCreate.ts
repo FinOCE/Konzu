@@ -12,7 +12,7 @@ export default class extends Event {
             let command = this.client.commands.get(interaction.commandName)
 
             if (!command) {
-                this.client.guilds.cache.get(process.env.server!)?.commands.delete(interaction.commandId)
+                this.client.guilds.cache.get(this.client.config.snowflakes.server)?.commands.delete(interaction.commandId)
                 interaction.reply('This command no longer exists! Deleting now...')
                 setTimeout(() => interaction.deleteReply(), 2000)
                 return

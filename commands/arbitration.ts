@@ -41,12 +41,11 @@ export default class extends Command {
 
         // Create MessageEmbed for response
         let embed = new MessageEmbed()
-            .setColor('#f6e58d')
-            .setAuthor('Konzu says...', 'https://i.redd.it/tk7edwn1y2031.png', 'https://itsf.in/konzu')
+            .setColor(this.client.config.embed.color)
+            .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
             .setTitle(`Current Arbitration Mission - ${platforms[platform]}`)
             .setURL('https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html#arbitrations')
-            .setImage('https://static.wikia.nocookie.net/warframe/images/a/a5/Infestation_b.svg')
             .setDescription([
                 `🌏 Node: **${data.node}**`,
                 `🗺️ Mission: **${data.type} (${data.enemy})**`,
