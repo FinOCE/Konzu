@@ -18,12 +18,13 @@ export default class Client extends DJSClient {
         this.commands = new Collection<string, Command>()
         this.buttons = new Collection<string, Button>()
 
-        {async () => {
+        {(async () => {
             await this.initialiseEvents()
             await this.login(process.env.token)
             await this.initialiseCommands()
             await this.initialiseButtons()
-        }}
+            console.log('Konzu is ready for lunch!')
+        })()}
     }
 
     /**
