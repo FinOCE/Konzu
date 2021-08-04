@@ -4,6 +4,7 @@ import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import API from '../utils/API'
 import quote from '../utils/quote'
+import Formatting, {Platform} from '../utils/Formatting'
 
 export default class extends Command {
     constructor(client: Client) {
@@ -28,28 +29,20 @@ export default class extends Command {
         interaction.defer({fetchReply: true})
 
         // Get data relevant to platform
-        let platform = interaction.options.get('platform')?.value as 'pc' | 'ps4' | 'xb1' | 'swi'
+        let platform = interaction.options.get('platform')?.value as Platform
         let data = await API.query(`${platform}/arbitration`)
-
-        // Rename platform to what was used in CommandOptionChoice for response
-        const platforms = {
-            'pc': 'PC',
-            'ps4': 'Playstation',
-            'xb1': 'Xbox',
-            'swi': 'Switch'
-        }
 
         // Create MessageEmbed for response
         let embed = new MessageEmbed()
             .setColor(this.client.config.embed.color)
             .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
-            .setTitle(`Current Arbitration Mission - ${platforms[platform]}`)
+            .setTitle(`Current Arbitration Mission - ${Formatting.getPlatform(platform)}`)
             .setURL('https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html#arbitrations')
             .setDescription([
                 `🌏 Node: **${data.node}**`,
                 `🗺️ Mission: **${data.type} (${data.enemy})**`,
-                `🕑 Expires: **${moment.duration(moment(data.expiry).diff(Date.now())).humanize(true)}**`,
+                `🕑 Expires: **${Formatting.humaniseTimeDifference(data.expiry)}**`,
                 `\n[Click here](https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html#arbitrations) to view the drop table for arbitrations.`
             ].join('\n'))
         
