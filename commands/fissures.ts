@@ -1,9 +1,11 @@
-import {CommandInteraction} from 'discord.js'
+import {CommandInteraction, MessageEmbed} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
-import {ActionRow, SelectMenu} from '../models/Component'
+import {ActionRow, SelectMenu, SelectMenuOption} from '../models/Component'
 import API from '../utils/API'
 import Fissures from '../types/Fissures'
+import Formatting, {Platform} from '../utils/Formatting'
+import Embed from '../models/Embed'
 
 export default class extends Command {
     constructor(client: Client) {
@@ -37,7 +39,7 @@ export default class extends Command {
         interaction.defer({fetchReply: true})
 
         // Get data relevant to platform
-        let platform = interaction.options.get('platform')?.value as string
+        let platform = interaction.options.get('platform')?.value as Platform
         let data: Fissures[] = await API.query(`${platform}/fissures`)
 
         let tier = interaction.options.get('tier')?.value as string | undefined
@@ -61,24 +63,31 @@ export default class extends Command {
         let railjackEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.railjack)
 
         // Fulfil deferred interaction
-        interaction.followUp(
-            data
-                .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
-                .sort((a, b) => a.tierNum - b.tierNum)
-                .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
-                .join('\n')
-                .substring(0, 1800)
-                .concat('\n*`response cut off because length`*')
-        /*{
-            content: data
-                .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
-                .sort((a, b) => a.tierNum - b.tierNum)
-                .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
-                .join('\n'),
+        interaction.followUp({
+            embeds: [
+                new Embed()
+                    .setTitle(`Current Fissure Missions - ${Formatting.getPlatform(platform)}`)
+                    .setDescription(
+                        data
+                            .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
+                            .sort((a, b) => a.tierNum - b.tierNum)
+                            .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
+                            .join('\n')
+                    )
+            ],
             components: [
                 new ActionRow()
-                    .addComponent(new SelectMenu())
+                    .addComponent(
+                        new SelectMenu()
+                            .setName('Select fissure tier...')
+                            .setCustomId('tier')
+                            .addOption(
+                                new SelectMenuOption('Lith', 'lith')
+                                    .setDescription('Search for Lith fissures')
+                                    .setEmoji(this.client.config.snowflakes.emoji.lith)
+                            )
+                    )
             ]
-        }*/)
+        })
     }
 }
