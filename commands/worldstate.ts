@@ -47,6 +47,7 @@ export default class extends Command {
             .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
             .setTitle(`Current World State - ${Formatting.getPlatform(platform)}`)
+            .setTimestamp()
             .addFields([{
                 name: `${cetusEmoji} Cetus`,
                 value: `**${Formatting.capitaliseFirstLetter(cetus.state)}** - changes \`${Formatting.humaniseTimeDifference(cetus.expiry)}\``,

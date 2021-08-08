@@ -41,6 +41,7 @@ export default class extends Command {
             .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
             .setTitle(`Current Arbitration Mission - ${Formatting.getPlatform(platform)}`)
+            .setTimestamp()
             .setDescription([
                 `🌏 Node: **${data.node}**`,
                 `🗺️ Mission: ${enemyEmoji} **${data.type} (${data.enemy})**`,
