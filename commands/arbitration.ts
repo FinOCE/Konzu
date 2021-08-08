@@ -32,16 +32,18 @@ export default class extends Command {
         let platform = interaction.options.get('platform')?.value as Platform
         let data = await API.query(`${platform}/arbitration`)
 
+        // Get custom emoji
+        let enemyEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji[data.enemy.toLowerCase()])
+
         // Create MessageEmbed for response
         let embed = new MessageEmbed()
             .setColor(this.client.config.embed.color)
             .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
             .setTitle(`Current Arbitration Mission - ${Formatting.getPlatform(platform)}`)
-            .setURL('https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html#arbitrations')
             .setDescription([
                 `🌏 Node: **${data.node}**`,
-                `🗺️ Mission: **${data.type} (${data.enemy})**`,
+                `🗺️ Mission: ${enemyEmoji} **${data.type} (${data.enemy})**`,
                 `🕑 Expires: **${Formatting.humaniseTimeDifference(data.expiry)}**`,
                 `\n[Click here](https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html#arbitrations) to view the drop table for arbitrations.`
             ].join('\n'))

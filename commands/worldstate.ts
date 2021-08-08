@@ -36,18 +36,38 @@ export default class extends Command {
             API.query(`${platform}/earthCycle`)
         ])
 
+        // Get custom emoji
+        let cetusEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.cetus)
+        let solarisEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.solaris)
+        let entratiEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.entrati)
+
         // Create MessageEmbed for response
         let embed = new MessageEmbed()
             .setColor(this.client.config.embed.color)
             .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
             .setFooter(quote())
             .setTitle(`Current World State - ${Formatting.getPlatform(platform)}`)
-            .setDescription([
-                `Cetus: **${Formatting.capitaliseFirstLetter(cetus.state)}**\n*expires **${Formatting.humaniseTimeDifference(cetus.expiry)}***\n`,
-                `Orb Vallis: **${Formatting.capitaliseFirstLetter(vallis.state)}**\n*expires **${Formatting.humaniseTimeDifference(vallis.expiry)}***\n`,
-                `Cambion Drift: **${Formatting.capitaliseFirstLetter(cambion.active)}**\n*expires **${Formatting.humaniseTimeDifference(cambion.expiry)}***\n`,
-                `Earth: **${Formatting.capitaliseFirstLetter(earth.state)}**\n*expires **${Formatting.humaniseTimeDifference(earth.expiry)}***\n`
-            ].join('\n'))
+            .addFields([{
+                name: `${cetusEmoji} Cetus`,
+                value: `**${Formatting.capitaliseFirstLetter(cetus.state)}** - changes \`${Formatting.humaniseTimeDifference(cetus.expiry)}\``,
+                inline: true
+            }, {
+                name: `${solarisEmoji} Orb Vallis`,
+                value: `**${Formatting.capitaliseFirstLetter(vallis.state)}** - changes \`${Formatting.humaniseTimeDifference(vallis.expiry)}\``,
+                inline: true
+            }, {
+                name: '‎',
+                value: '‎',
+                inline: false
+            }, {
+                name: `${entratiEmoji} Cambion Drift`,
+                value: `**${Formatting.capitaliseFirstLetter(cambion.active)}** - changes \`${Formatting.humaniseTimeDifference(cambion.expiry)}\``,
+                inline: true
+            }, {
+                name: `🌏 Earth`,
+                value: `**${Formatting.capitaliseFirstLetter(earth.state)}** - changes \`${Formatting.humaniseTimeDifference(earth.expiry)}\``,
+                inline: true
+            }])
         
         // Fulfil deferred interaction
         interaction.followUp({embeds: [embed]})
