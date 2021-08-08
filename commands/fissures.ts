@@ -1,6 +1,7 @@
 import {CommandInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
+import {ActionRow, SelectMenu} from '../models/Component'
 import API from '../utils/API'
 import Fissures from '../types/Fissures'
 
@@ -18,7 +19,16 @@ export default class extends Command {
                 .addChoice(new CommandOptionChoice('PC', 'pc'))
                 .addChoice(new CommandOptionChoice('Playstation', 'ps4'))
                 .addChoice(new CommandOptionChoice('Xbox', 'xb1'))
-                .addChoice(new CommandOptionChoice('Switch', 'swi'))
+                .addChoice(new CommandOptionChoice('Switch', 'swi')),
+            new CommandOption()
+                .setName('tier')
+                .setDescription('Select the tier of relic to list')
+                .setType('STRING')
+                .addChoice(new CommandOptionChoice('Lith', 'lith'))
+                .addChoice(new CommandOptionChoice('Meso', 'meso'))
+                .addChoice(new CommandOptionChoice('Neo', 'neo'))
+                .addChoice(new CommandOptionChoice('Axi', 'axi'))
+                .addChoice(new CommandOptionChoice('Requiem', 'requiem'))
         ])
     }
 
@@ -29,6 +39,8 @@ export default class extends Command {
         // Get data relevant to platform
         let platform = interaction.options.get('platform')?.value as string
         let data: Fissures[] = await API.query(`${platform}/fissures`)
+
+        let tier = interaction.options.get('tier')?.value as string | undefined
 
         // Get custom emoji
         let factionEmojis = {
@@ -46,7 +58,27 @@ export default class extends Command {
             Requiem: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.requiem)
         }
 
+        let railjackEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.railjack)
+
         // Fulfil deferred interaction
-        interaction.followUp(`${data.sort((a, b) => a.tierNum - b.tierNum).map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.missionType} (${m.enemy} ${m.tier})`).join('\n')}`)
+        interaction.followUp(
+            data
+                .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
+                .sort((a, b) => a.tierNum - b.tierNum)
+                .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
+                .join('\n')
+                .substring(0, 1800)
+                .concat('\n*`response cut off because length`*')
+        /*{
+            content: data
+                .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
+                .sort((a, b) => a.tierNum - b.tierNum)
+                .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
+                .join('\n'),
+            components: [
+                new ActionRow()
+                    .addComponent(new SelectMenu())
+            ]
+        }*/)
     }
 }
