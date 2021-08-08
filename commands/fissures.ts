@@ -2,6 +2,7 @@ import {CommandInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import API from '../utils/API'
+import Fissures from '../types/Fissures'
 
 export default class extends Command {
     constructor(client: Client) {
@@ -27,29 +28,25 @@ export default class extends Command {
 
         // Get data relevant to platform
         let platform = interaction.options.get('platform')?.value as string
-        let data = await API.query(`${platform}/fissures`)
+        let data: Fissures[] = await API.query(`${platform}/fissures`)
 
         // Get custom emoji
         let factionEmojis = {
-            grineer: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.grineer),
-            corpus: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.corpus),
-            infested: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.infested),
-            orokin: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.orokin)
+            Grineer: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.grineer),
+            Corpus: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.corpus),
+            Infested: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.infested),
+            Orokin: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.orokin)
         }
 
         let relicEmojis = {
-            lith: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.lith),
-            meso: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.meso),
-            neo: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.neo),
-            axi: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.axi),
-            requiem: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.requiem)
+            Lith: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.lith),
+            Meso: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.meso),
+            Neo: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.neo),
+            Axi: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.axi),
+            Requiem: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.requiem)
         }
 
         // Fulfil deferred interaction
-        interaction.followUp(`${data.map((m: any) => `${
-            relicEmojis[m.tier.toLowerCase() as 'lith' | 'meso' | 'neo' | 'axi' | 'requiem']
-        } ${
-            factionEmojis[m.enemy.toLowerCase() as 'grineer' | 'corpus' | 'infested' | 'orokin']
-        } ${m.missionType} (${m.enemy} ${m.tier})`).join('\n')}`)
+        interaction.followUp(`${data.sort((a, b) => a.tierNum - b.tierNum).map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.missionType} (${m.enemy} ${m.tier})`).join('\n')}`)
     }
 }
