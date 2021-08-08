@@ -1,9 +1,9 @@
-import {CommandInteraction, MessageEmbed} from 'discord.js'
+import {CommandInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import API from '../utils/API'
-import quote from '../utils/quote'
 import Formatting, {Platform} from '../utils/Formatting'
+import Embed from '../models/Embed'
 
 export default class extends Command {
     constructor(client: Client) {
@@ -42,12 +42,8 @@ export default class extends Command {
         let entratiEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.entrati)
 
         // Create MessageEmbed for response
-        let embed = new MessageEmbed()
-            .setColor(this.client.config.embed.color)
-            .setAuthor(this.client.config.embed.author.name, this.client.config.embed.author.image, this.client.config.embed.author.url)
-            .setFooter(quote())
+        let embed = new Embed()
             .setTitle(`Current World State - ${Formatting.getPlatform(platform)}`)
-            .setTimestamp()
             .addFields([{
                 name: `${cetusEmoji} Cetus`,
                 value: `**${Formatting.capitaliseFirstLetter(cetus.state)}** - changes \`${Formatting.humaniseTimeDifference(cetus.expiry)}\``,
