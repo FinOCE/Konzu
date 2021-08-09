@@ -18,12 +18,14 @@ export default class extends Event {
                 return
             }
 
-            try {
-                command.run(interaction)
-            } catch(err) {
-                interaction.reply('Something went wrong trying to run this command.')
-                console.log(err)
-            }
+            command.run(interaction)
+        }
+
+        if (interaction.isSelectMenu()) {
+            let menu = this.client.menus.get(interaction.customId)
+            if (!menu) return
+
+            menu.run(interaction)
         }
     }
 }
