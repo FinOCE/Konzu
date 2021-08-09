@@ -106,6 +106,11 @@ export class SelectMenuOption implements MessageSelectOption {
         this.emoji = emoji
         return this
     }
+
+    public setDefault(): SelectMenuOption {
+        this.default = true
+        return this
+    }
 }
 
 /**

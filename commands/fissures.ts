@@ -3,7 +3,7 @@ import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import {ActionRow, SelectMenu, SelectMenuOption} from '../models/Component'
 import API from '../utils/API'
-import Fissures from '../types/Fissures'
+import Fissures, {Tier} from '../types/Fissures'
 import Formatting, {Platform} from '../utils/Formatting'
 import Embed from '../models/Embed'
 
@@ -62,18 +62,34 @@ export default class extends Command {
 
         let railjackEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.railjack)
 
+        // Get existing fissure tiers
+        enum tierNum {
+            Lith = 1,
+            Meso = 2,
+            Neo = 3,
+            Axi = 4,
+            Requiem = 5
+        }
+
+        let existingTiers = Array
+            .from(new Set<Tier>(data.map(m => m.tier)))
+            .filter(t => tier? (t.toLowerCase() === tier) : true)
+            .sort((a, b) => tierNum[a] - tierNum[b])
+
         // Fulfil deferred interaction
         interaction.followUp({
             embeds: [
                 new Embed()
                     .setTitle(`Current Fissure Missions - ${Formatting.getPlatform(platform)}`)
-                    .setDescription(
-                        data
-                            .filter(m => tier ? (m.tier.toLowerCase() === tier) : true)
-                            .sort((a, b) => a.tierNum - b.tierNum)
-                            .map(m => `${relicEmojis[m.tier]} ${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType} (${m.enemy} ${m.tier})`)
-                            .join('\n')
-                    )
+                    .addFields(existingTiers.map(t => {
+                        return {
+                            name: `${relicEmojis[t]} ${t}`,
+                            value: data
+                                .filter(m => m.tier === t)
+                                .map(m => `${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType}`)
+                                .join('\n')
+                        }
+                    }))
             ],
             components: [
                 new ActionRow()
@@ -81,6 +97,10 @@ export default class extends Command {
                         new SelectMenu()
                             .setName('Select fissure tier...')
                             .setCustomId('tier')
+                            .addOption(new SelectMenuOption('All', 'all')
+                                .setDescription('Search for any tier of fissures')
+                                .setEmoji(this.client.config.snowflakes.emoji.relic)
+                                .setDefault())
                             .addOption(new SelectMenuOption('Lith', 'lith')
                                 .setDescription('Search for Lith fissures')
                                 .setEmoji(this.client.config.snowflakes.emoji.lith))
