@@ -1,4 +1,4 @@
-import {MessageComponentInteraction} from 'discord.js'
+import {SelectMenuInteraction} from 'discord.js'
 import Client from './Client'
 import Interaction from './Interaction'
 
@@ -10,5 +10,5 @@ export default abstract class Menu extends Interaction {
     /**
      * Handle a menu interaction.
      */
-    abstract run(interaction: MessageComponentInteraction): void | Promise<void>
+    abstract run(interaction: SelectMenuInteraction): void | Promise<void>
 }
