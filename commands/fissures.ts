@@ -1,4 +1,4 @@
-import {CommandInteraction, MessageEmbed} from 'discord.js'
+import {CommandInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import {ActionRow, SelectMenu, SelectMenuOption} from '../models/Component'
