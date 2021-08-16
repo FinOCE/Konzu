@@ -1,4 +1,4 @@
-import {SelectMenuInteraction} from 'discord.js'
+import {MessageEmbed, SelectMenuInteraction, TextChannel} from 'discord.js'
 import Client from '../models/Client'
 import Menu from '../models/Menu'
 
@@ -8,6 +8,10 @@ export default class extends Menu {
     }
 
     public run(interaction: SelectMenuInteraction) {
-        interaction.reply(`Interaction performed: \`${interaction.customId}.${interaction.values[0]}\``)
+        (this.client.channels.cache.get(interaction.channelId!) as TextChannel)?.messages.cache.get(interaction.message.id)?.edit({embeds: [
+            new MessageEmbed()
+                .setDescription(`Interaction performed: \`${interaction.customId}.${interaction.values[0]}\``)
+        ]})
+        interaction.update({fetchReply: false})
     }
 }
