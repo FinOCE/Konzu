@@ -31,6 +31,13 @@ export default class Formatting {
     }
 
     /**
+     * Get the humanised time until the given time.
+     */
+     static humaniseTimeTo(time1: Date | string | number) {
+        return moment.duration(moment(time1).diff(Date.now())).humanize()
+    }
+
+    /**
      * Get a custom emoji that has its snowflake stored in config.
      */
     static getCustomEmoji(client: Client, name: string): GuildEmoji | undefined {
