@@ -76,26 +76,26 @@ export default class extends Command {
                 break;
             
             // Railjack fissures
-            case 'Railjack':
-                let railjackMissions = data.filter(m => m.isStorm)
-                let tiersWithMissions = Array
-                    .from(new Set<Tier>(railjackMissions.map(m => m.tier)))
-                embed = new Embed()
-                    .setTitle(`Current Railjack Fissure Missions - ${Formatting.getPlatform(platform)}`)
-                    .addFields(
-                        tiersWithMissions.sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
-                            return {
-                                name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
-                                value: data
-                                    .filter(m => m.tier === t)
-                                    .filter(m => m.isStorm)
-                                    .map(m => displayMission(m))
-                                    .join('\n')
-                            }
-                        })
-                    )
+            // case 'Railjack':
+            //     let railjackMissions = data.filter(m => m.isStorm)
+            //     let tiersWithMissions = Array
+            //         .from(new Set<Tier>(railjackMissions.map(m => m.tier)))
+            //     embed = new Embed()
+            //         .setTitle(`Current Railjack Fissure Missions - ${Formatting.getPlatform(platform)}`)
+            //         .addFields(
+            //             tiersWithMissions.sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
+            //                 return {
+            //                     name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
+            //                     value: data
+            //                         .filter(m => m.tier === t)
+            //                         .filter(m => m.isStorm)
+            //                         .map(m => displayMission(m))
+            //                         .join('\n')
+            //                 }
+            //             })
+            //         )
                 
-                break;
+            //     break;
 
             // Summary of fissures
             case 'Summary':
