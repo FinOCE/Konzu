@@ -1,9 +1,9 @@
-import {CommandInteraction} from 'discord.js'
+import {CommandInteraction, MessageEmbed} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import {ActionRow, SelectMenu, SelectMenuOption} from '../models/Component'
 import API from '../utils/API'
-import Fissures, {Tier} from '../types/Fissures'
+import Fissures, {Tier, TierNum, TierOption} from '../types/Fissures'
 import Formatting, {Platform} from '../utils/Formatting'
 import Embed from '../models/Embed'
 
@@ -26,11 +26,12 @@ export default class extends Command {
                 .setName('tier')
                 .setDescription('Select the tier of relic to list')
                 .setType('STRING')
-                .addChoice(new CommandOptionChoice('Lith', 'lith'))
-                .addChoice(new CommandOptionChoice('Meso', 'meso'))
-                .addChoice(new CommandOptionChoice('Neo', 'neo'))
-                .addChoice(new CommandOptionChoice('Axi', 'axi'))
-                .addChoice(new CommandOptionChoice('Requiem', 'requiem'))
+                .addChoice(new CommandOptionChoice('Railjack'))
+                .addChoice(new CommandOptionChoice('Lith'))
+                .addChoice(new CommandOptionChoice('Meso'))
+                .addChoice(new CommandOptionChoice('Neo'))
+                .addChoice(new CommandOptionChoice('Axi'))
+                .addChoice(new CommandOptionChoice('Requiem'))
         )
     }
 
@@ -41,62 +42,74 @@ export default class extends Command {
         // Get data relevant to platform
         let platform = interaction.options.get('platform')?.value as Platform
         let data: Fissures[] = await API.query(`${platform}/fissures`)
+        let tier = interaction.options.get('tier')?.value as TierOption ?? 'Summary'
 
-        let tier = interaction.options.get('tier')?.value as string | undefined
+        // Create embed relevant to selection
+        let embed: MessageEmbed;
 
-        // Get custom emoji
-        const getEmoji = (name: string) => {
-            return this.client.emojis.cache.get(this.client.config.snowflakes.emoji[name])
+        switch (tier) {
+            // Specific fissures
+            case 'Lith':
+            case 'Meso':
+            case 'Neo':
+            case 'Axi':
+            case 'Requiem':
+                embed = new Embed()
+                    .setTitle(`Current ${tier} Fissure Missions - ${Formatting.getPlatform(platform)}`)
+                    .addField(
+                        `${Formatting.getCustomEmoji(this.client, tier)} ${tier}`,
+                        data
+                            .filter(m => m.tier === tier)
+                            .map(m => `${Formatting.getCustomEmoji(this.client, m.enemy)} ${m.isStorm ? Formatting.getCustomEmoji(this.client, 'railjack') : ''} ${m.missionType}`)
+                            .join('\n')
+                    )
+                
+                break;
+            
+            // Railjack fissures
+            case 'Railjack':
+                embed = new Embed()
+                    .setTitle(`Current Railjack Fissure Missions - ${Formatting.getPlatform(platform)}`)
+                    .addFields(
+                        Array
+                            .from(new Set<Tier>(data.map(m => m.tier)))
+                            .sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
+                                return {
+                                    name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
+                                    value: '. ' + data
+                                        .filter(m => m.tier === t)
+                                        .filter(m => m.isStorm)
+                                        .map(m => `${Formatting.getCustomEmoji(this.client, m.enemy)} ${m.isStorm ? Formatting.getCustomEmoji(this.client, 'railjack') : ''} ${m.missionType}`)
+                                        .join('\n')
+                                }
+                            })
+                    )
+                
+                break;
+
+            // Summary of fissures
+            case 'Summary':
+            default:
+                embed = new Embed()
+                    .setTitle(`Current Fissure Missions Summary - ${Formatting.getPlatform(platform)}`)
+                    .addFields(
+                        Array
+                            .from(new Set<Tier>(data.map(m => m.tier)))
+                            .sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
+                                return {
+                                    name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
+                                    value: `${data.filter(m => m.tier === t).length} missions`
+                                }
+                            })
+                    )
+                break;
         }
-
-        let factionEmojis = {
-            Grineer: getEmoji('grineer'),
-            Corpus: getEmoji('corpus'),
-            Infested: getEmoji('infested'),
-            Orokin: getEmoji('orokin')
-        }
-
-        let relicEmojis = {
-            Lith: getEmoji('lith'),
-            Meso: getEmoji('meso'),
-            Neo: getEmoji('neo'),
-            Axi: getEmoji('axi'),
-            Requiem: getEmoji('requiem')
-        }
-
-        let railjackEmoji = getEmoji('railjack')
-
-        // Get existing fissure tiers
-        enum tierNum {
-            Lith = 1,
-            Meso = 2,
-            Neo = 3,
-            Axi = 4,
-            Requiem = 5
-        }
-
-        let existingTiers = Array
-            .from(new Set<Tier>(data.map(m => m.tier)))
-            .filter(t => tier? (t.toLowerCase() === tier) : true)
-            .sort((a, b) => tierNum[a] - tierNum[b])
 
         // Fulfil deferred interaction
         let emojis = this.client.config.snowflakes.emoji
-        
+
         interaction.followUp({
-            embeds: [
-                new Embed()
-                    .setTitle(`Current Fissure Missions - ${Formatting.getPlatform(platform)}`)
-                    .addFields(existingTiers.map(t => {
-                        return {
-                            name: `${relicEmojis[t]} ${t}`,
-                            value: data
-                                .filter(m => m.tier === t)
-                                .map(m => `${factionEmojis[m.enemy]} ${m.isStorm ? railjackEmoji : ''} ${m.missionType}`)
-                                .join('\n')
-                        }
-                    }))
-            ],
+            embeds: [embed],
             components: [
                 new ActionRow()
                     .addComponent(
@@ -104,13 +117,13 @@ export default class extends Command {
                             .setName('Select fissure tier...')
                             .setCustomId('tier')
                             .addSeveralOptions(
-                                new SelectMenuOption('Summary', 'summary')  .setDescription('Get basic information about fissures').setEmoji(emojis.relic),
-                                new SelectMenuOption('Lith', 'lith')        .setDescription('Search for all Lith fissures')        .setEmoji(emojis.lith),
-                                new SelectMenuOption('Meso', 'meso')        .setDescription('Search for all Meso fissures')        .setEmoji(emojis.meso),
-                                new SelectMenuOption('Neo', 'neo')          .setDescription('Search for all Neo fissures')         .setEmoji(emojis.neo),
-                                new SelectMenuOption('Axi', 'axi')          .setDescription('Search for all Axi fissures')         .setEmoji(emojis.axi),
-                                new SelectMenuOption('Requiem', 'requiem')  .setDescription('Search for all Requiem fissures')     .setEmoji(emojis.requiem),
-                                new SelectMenuOption('Railjack', 'railjack').setDescription('Search for all Railjack fissures')    .setEmoji(emojis.railjack)
+                                new SelectMenuOption('Summary', 'summary')  .setDescription('Get basic information about fissures').setEmoji(emojis.relic),     // Summary
+                                new SelectMenuOption('Railjack', 'railjack').setDescription('Search for all Railjack fissures')    .setEmoji(emojis.railjack),  // Railjack
+                                new SelectMenuOption('Lith', 'lith')        .setDescription('Search for all Lith fissures')        .setEmoji(emojis.lith),      // Lith
+                                new SelectMenuOption('Meso', 'meso')        .setDescription('Search for all Meso fissures')        .setEmoji(emojis.meso),      // Meso
+                                new SelectMenuOption('Neo', 'neo')          .setDescription('Search for all Neo fissures')         .setEmoji(emojis.neo),       // Neo
+                                new SelectMenuOption('Axi', 'axi')          .setDescription('Search for all Axi fissures')         .setEmoji(emojis.axi),       // Axi
+                                new SelectMenuOption('Requiem', 'requiem')  .setDescription('Search for all Requiem fissures')     .setEmoji(emojis.requiem)    // Requiem
                             )
                     )
             ]

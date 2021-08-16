@@ -111,8 +111,8 @@ export class CommandOptionChoice implements ApplicationCommandOptionChoice {
     public name: string
     public value: number | string
 
-    constructor(name: string, value: number | string) {
+    constructor(name: string, value?: number | string) {
         this.name = name
-        this.value = value
+        this.value = value ?? name
     }
 }
