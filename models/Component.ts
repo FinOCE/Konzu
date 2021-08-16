@@ -28,6 +28,11 @@ export class ActionRow extends MessageActionRow {
         this.components.push(component)
         return this
     }
+
+    public addSeveralComponents(...components: SelectMenu[]): ActionRow {
+        for (let component of components) this.components.push(component)
+        return this
+    }
 }
 
 /**
@@ -54,6 +59,14 @@ export class SelectMenu extends MessageSelectMenu {
      */
     public addOption(option: SelectMenuOption): SelectMenu {
         this.options.push(option)
+        return this
+    }
+
+    /**
+     * Add many menu options to the select menu.
+     */
+    public addSeveralOptions(...options: SelectMenuOption[]): SelectMenu {
+        for (let option of options) this.options.push(option)
         return this
     }
 

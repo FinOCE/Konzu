@@ -51,7 +51,7 @@ export default abstract class Command extends Interaction {
     /**
      * Add arguments to the command.
      */
-    public addOptions(options: CommandOption[]): void {
+    public addOptions(...options: CommandOption[]): void {
         this.options = []
 
         for (let option of options) {

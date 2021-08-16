@@ -10,7 +10,7 @@ export default class extends Command {
         super(client)
 
         this.setDescription('Check current arbitration mission')
-        this.addOptions([
+        this.addOptions(
             new CommandOption()
                 .setName('platform')
                 .setDescription('Select the platform you play on')
@@ -20,7 +20,7 @@ export default class extends Command {
                 .addChoice(new CommandOptionChoice('Playstation', 'ps4'))
                 .addChoice(new CommandOptionChoice('Xbox', 'xb1'))
                 .addChoice(new CommandOptionChoice('Switch', 'swi'))
-        ])
+        )
     }
 
     async run(interaction: CommandInteraction) {

@@ -12,7 +12,7 @@ export default class extends Command {
         super(client)
 
         this.setDescription('Check current void fissures')
-        this.addOptions([
+        this.addOptions(
             new CommandOption()
                 .setName('platform')
                 .setDescription('Select the platform you play on')
@@ -31,7 +31,7 @@ export default class extends Command {
                 .addChoice(new CommandOptionChoice('Neo', 'neo'))
                 .addChoice(new CommandOptionChoice('Axi', 'axi'))
                 .addChoice(new CommandOptionChoice('Requiem', 'requiem'))
-        ])
+        )
     }
 
     async run(interaction: CommandInteraction) {
@@ -45,22 +45,26 @@ export default class extends Command {
         let tier = interaction.options.get('tier')?.value as string | undefined
 
         // Get custom emoji
+        const getEmoji = (name: string) => {
+            return this.client.emojis.cache.get(this.client.config.snowflakes.emoji[name])
+        }
+
         let factionEmojis = {
-            Grineer: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.grineer),
-            Corpus: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.corpus),
-            Infested: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.infested),
-            Orokin: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.orokin)
+            Grineer: getEmoji('grineer'),
+            Corpus: getEmoji('corpus'),
+            Infested: getEmoji('infested'),
+            Orokin: getEmoji('orokin')
         }
 
         let relicEmojis = {
-            Lith: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.lith),
-            Meso: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.meso),
-            Neo: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.neo),
-            Axi: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.axi),
-            Requiem: this.client.emojis.cache.get(this.client.config.snowflakes.emoji.requiem)
+            Lith: getEmoji('lith'),
+            Meso: getEmoji('meso'),
+            Neo: getEmoji('neo'),
+            Axi: getEmoji('axi'),
+            Requiem: getEmoji('requiem')
         }
 
-        let railjackEmoji = this.client.emojis.cache.get(this.client.config.snowflakes.emoji.railjack)
+        let railjackEmoji = getEmoji('railjack')
 
         // Get existing fissure tiers
         enum tierNum {
@@ -77,6 +81,8 @@ export default class extends Command {
             .sort((a, b) => tierNum[a] - tierNum[b])
 
         // Fulfil deferred interaction
+        let emojis = this.client.config.snowflakes.emoji
+        
         interaction.followUp({
             embeds: [
                 new Embed()
@@ -97,27 +103,15 @@ export default class extends Command {
                         new SelectMenu()
                             .setName('Select fissure tier...')
                             .setCustomId('tier')
-                            .addOption(new SelectMenuOption('All', 'all')
-                                .setDescription('Search for any tier of fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.relic))
-                            .addOption(new SelectMenuOption('Lith', 'lith')
-                                .setDescription('Search for all Lith fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.lith))
-                            .addOption(new SelectMenuOption('Meso', 'meso')
-                                .setDescription('Search for all Meso fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.meso))
-                            .addOption(new SelectMenuOption('Neo', 'neo')
-                                .setDescription('Search for all Neo fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.neo))
-                            .addOption(new SelectMenuOption('Axi', 'axi')
-                                .setDescription('Search for all Axi fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.axi))
-                            .addOption(new SelectMenuOption('Requiem', 'requiem')
-                                .setDescription('Search for all Requiem fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.requiem))
-                            .addOption(new SelectMenuOption('Railjack', 'railjack')
-                                .setDescription('Search for all Railjack fissures')
-                                .setEmoji(this.client.config.snowflakes.emoji.railjack))
+                            .addSeveralOptions(
+                                new SelectMenuOption('Summary', 'summary')  .setDescription('Get basic information about fissures').setEmoji(emojis.relic),
+                                new SelectMenuOption('Lith', 'lith')        .setDescription('Search for all Lith fissures')        .setEmoji(emojis.lith),
+                                new SelectMenuOption('Meso', 'meso')        .setDescription('Search for all Meso fissures')        .setEmoji(emojis.meso),
+                                new SelectMenuOption('Neo', 'neo')          .setDescription('Search for all Neo fissures')         .setEmoji(emojis.neo),
+                                new SelectMenuOption('Axi', 'axi')          .setDescription('Search for all Axi fissures')         .setEmoji(emojis.axi),
+                                new SelectMenuOption('Requiem', 'requiem')  .setDescription('Search for all Requiem fissures')     .setEmoji(emojis.requiem),
+                                new SelectMenuOption('Railjack', 'railjack').setDescription('Search for all Railjack fissures')    .setEmoji(emojis.railjack)
+                            )
                     )
             ]
         })
