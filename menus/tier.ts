@@ -1,4 +1,4 @@
-import {MessageEmbed, SelectMenuInteraction, TextChannel} from 'discord.js'
+import {SelectMenuInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Menu from '../models/Menu'
 import {FissureCommandUtils} from '../commands/fissures'
