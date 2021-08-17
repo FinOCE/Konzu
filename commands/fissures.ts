@@ -4,7 +4,8 @@ import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import {ActionRow, SelectMenu, SelectMenuOption} from '../models/Component'
 import API from '../utils/API'
 import Fissures, {Tier, TierNum, TierOption} from '../types/Fissures'
-import Formatting, {Platform} from '../utils/Formatting'
+import Formatting from '../utils/Formatting'
+import {Platform} from '../types/general'
 import Embed from '../models/Embed'
 
 export default class extends Command {

@@ -4,3 +4,5 @@ export type Mission = 'Arena'          | 'Assassination'  | 'Assault'   | 'Captu
                     | 'Excavation'     | 'Exterminate'    | 'Free Roam' | 'Hijack'   | 'Infested Salvage' | 'Interception'        | 'Junction'
                     | 'Mobile Defense' | 'Persuit'        | 'Rescue'    | 'Rush'     | 'Sabotage'         | 'Sanctuary Onslaught'
                     | 'Skirmish'       | 'Spy'            | 'Survival'  | 'Volatile'
+
+export type Platform = 'pc' | 'ps4' | 'xb1' | 'swi'

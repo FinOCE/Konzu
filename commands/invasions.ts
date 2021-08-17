@@ -3,7 +3,8 @@ import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import API from '../utils/API'
 import Invasion, {InvasionRewardItem, InvasionSummary} from '../types/Invasion'
-import Formatting, {Platform} from '../utils/Formatting'
+import Formatting from '../utils/Formatting'
+import {Platform} from '../types/general'
 import Embed from '../models/Embed'
 
 export default class extends Command {

@@ -1,8 +1,7 @@
 import { GuildEmoji } from 'discord.js'
 import moment from 'moment'
 import Client from '../models/Client'
-
-export type Platform = 'pc' | 'ps4' | 'xb1' | 'swi'
+import {Platform} from '../types/general'
 
 export default class Formatting {
     static getPlatform(platform: Platform) {
