@@ -1,17 +1,15 @@
 import {MessageEmbed, SelectMenuInteraction, TextChannel} from 'discord.js'
 import Client from '../models/Client'
 import Menu from '../models/Menu'
+import fissures from '../commands/fissures'
+import {TierOption} from '../types/Fissures'
 
 export default class extends Menu {
     constructor(client: Client) {
         super(client)
     }
 
-    public run(interaction: SelectMenuInteraction) {
-        (this.client.channels.cache.get(interaction.channelId!) as TextChannel)?.messages.cache.get(interaction.message.id)?.edit({embeds: [
-            new MessageEmbed()
-                .setDescription(`Interaction performed: \`${interaction.customId}.${interaction.values[0]}\``)
-        ]})
-        interaction.update({fetchReply: false})
+    public async run(interaction: SelectMenuInteraction) {
+        await fissures.update(this.client, interaction, 'pc', interaction.values[0] as TierOption)
     }
 }

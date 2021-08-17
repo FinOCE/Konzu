@@ -98,7 +98,7 @@ export class SelectMenuOption implements MessageSelectOption {
     public emoji: APIPartialEmoji
     public default: boolean
 
-    constructor(name: string, value: string) {
+    constructor(name: string, value: string = name) {
         this.label = name
         this.value = value
         this.description = ''
