@@ -51,7 +51,7 @@ export default class extends Command {
                     .addComponent(
                         new SelectMenu()
                             .setName('Select fissure tier...')
-                            .setCustomId('tier')
+                            .setCustomId('fissures')
                             .addSeveralOptions(
                                 new SelectMenuOption('Summary')
                                     .setDescription('Get basic information about fissures')
