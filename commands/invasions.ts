@@ -2,8 +2,9 @@ import {CommandInteraction} from 'discord.js'
 import Client from '../models/Client'
 import Command, {CommandOption, CommandOptionChoice} from '../models/Command'
 import API from '../utils/API'
-import Invasion, { InvasionReward, InvasionRewardItem, InvasionSummary } from '../types/Invasion'
-import Formatting from '../utils/Formatting'
+import Invasion, {InvasionRewardItem, InvasionSummary} from '../types/Invasion'
+import Formatting, {Platform} from '../utils/Formatting'
+import Embed from '../models/Embed'
 
 export default class extends Command {
     constructor(client: Client) {
@@ -24,9 +25,11 @@ export default class extends Command {
     }
 
     async run(interaction: CommandInteraction) {
-        let platform = interaction.options.get('platform')?.value as string
+        // Get data
+        let platform = interaction.options.get('platform')?.value as Platform
         let data = await API.query(`${platform}/invasions`) as Invasion[]
 
+        // Get specific planet data
         let planets: InvasionSummary[] = []
 
         for (let planet of new Set<string>(data.map(i => i.node.split('(')[1].split(')')[0]))) {
@@ -51,38 +54,34 @@ export default class extends Command {
             })
         }
 
-        interaction.reply(planets.map(planet => {
-            return [
-                `Planet: **${planet.planet}**`,
-                `Factions: ${Formatting.getCustomEmoji(this.client, planet.factions[0])} ${planet.factions[0]} vs ${Formatting.getCustomEmoji(this.client, planet.factions[1])} ${planet.factions[1]}`,
-                `**Available Rewards**`,
-                planet.rewards.map(reward => `${reward.count}x ${reward.type}`).join('\n')
-            ].join('\n')
-        }).join('\n\n'))
+        // Create embed fields for planets
+        let fields = planets.map(planet => {
+            return {
+                name: `🪐 ${planet.planet}`,
+                value: [
+                    `Factions: ${Formatting.getCustomEmoji(this.client, planet.factions[0])} **${planet.factions[0]}** vs ${Formatting.getCustomEmoji(this.client, planet.factions[1])} **${planet.factions[1]}**`,
+                    '\n**Available Rewards**',
+                    planet.rewards.map(reward => `${reward.count}x ${reward.type}`).join('\n')
+                ].join('\n'),
+                inline: true
+            }
+        })
 
-        // interaction.reply(invasions.map(i => {return [
-        //     `${Formatting.getCustomEmoji(this.client, i.attacker.faction)} **${i.attacker.faction}** vs ${Formatting.getCustomEmoji(this.client, i.defender.faction)} **${i.defender.faction}**`,
-        //     `**Available rewards**\n${
-        //         data
-        //             .filter(ii => ii.node.includes(i.node.split('(')[1].split(')')[0]))
-        //             .map(ii => `${ii.attacker.reward.itemString} or ${ii.defender.reward.itemString}`)
-        //             .join('\n')
-        //     }`
-        // ].join('\n')}).join('\n\n'))
+        // Add spacers to force rows of 2
+        let i = 0
+        while (i < fields.length) {
+            if (i % 3 === 2) fields.splice(i, 0, {name: '‎', value: '‎', inline: false}) // Has invisible characters
+            i++
+        }
 
-        // interaction.reply(data.map(i => {
-        //     if (i.vsInfestation) {
-        //         let faction = i.attacker.faction === 'Infested' ? i.defender : i.attacker
-        //         return [
-        //             `${Formatting.getCustomEmoji(this.client, 'Infested')} **Infested** vs ${Formatting.getCustomEmoji(this.client, faction.faction)} **${faction.faction}**`,
-        //             `for **${faction.reward.itemString}**`,
-        //             `**${i.desc}**`
-        //         ].join('\n')
-        //     } else return [
-        //         `${Formatting.getCustomEmoji(this.client, i.attacker.faction)} **${i.attacker.faction}** vs ${Formatting.getCustomEmoji(this.client, i.defender.faction)} **${i.defender.faction}**`,
-        //         `**${i.attacker.reward.itemString}** or **${i.defender.reward.itemString}**`,
-        //         `**${i.desc}**`
-        //     ].join('\n')
-        // }).join('\n\n'))
+        if (i % 3 === 1) fields.push({name: '‎', value: '‎', inline: true}) // Has invisible characters
+
+        // Create embed and respond to interaction
+        let embed = new Embed()
+            .setTitle(`Current Invasion Status - ${Formatting.getPlatform(platform)}`)
+            .setDescription('Available items include possible payouts from both factions.')
+            .addFields(fields)
+        
+        interaction.reply({embeds: [embed]})
     }
 }
