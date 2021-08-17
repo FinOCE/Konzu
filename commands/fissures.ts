@@ -26,7 +26,6 @@ export default class extends Command {
                 .setName('tier')
                 .setDescription('Select the tier of relic to list')
                 .setType('STRING')
-                //.addChoice(new CommandOptionChoice('Railjack'))
                 .addChoice(new CommandOptionChoice('Lith'))
                 .addChoice(new CommandOptionChoice('Meso'))
                 .addChoice(new CommandOptionChoice('Neo'))
@@ -41,86 +40,12 @@ export default class extends Command {
 
         // Get data relevant to platform
         let platform = interaction.options.get('platform')?.value as Platform
-        let data: Fissures[] = await API.query(`${platform}/fissures`)
         let tier = interaction.options.get('tier')?.value as TierOption ?? 'Summary'
-
-        // Create embed relevant to selection
-        const displayMission = (mission: Fissures) => {
-            return [
-                mission.isStorm
-                    ? `${Formatting.getCustomEmoji(this.client, mission.enemy)} ${Formatting.getCustomEmoji(this.client, 'railjack')} **${mission.missionType} (${mission.enemy} Railjack)**`
-                    : `${Formatting.getCustomEmoji(this.client, mission.enemy)} **${mission.missionType} (${mission.enemy})**`,
-                `Located at **${mission.node}** for **${Formatting.humaniseTimeTo(mission.expiry)}**`,
-                ''
-            ].join('\n')
-        }
-
-        let embed: MessageEmbed;
-
-        switch (tier) {
-            // Specific fissures
-            case 'Lith':
-            case 'Meso':
-            case 'Neo':
-            case 'Axi':
-            case 'Requiem':
-                embed = new Embed()
-                    .setTitle(`Current ${tier} Fissure Missions - ${Formatting.getPlatform(platform)}`)
-                    .setDescription(
-                        data
-                            .filter(m => m.tier === tier)
-                            .map(m => displayMission(m))
-                            .join('\n')
-                    )
-                
-                break;
-            
-            // Railjack fissures
-            // case 'Railjack':
-            //     let railjackMissions = data.filter(m => m.isStorm)
-            //     let tiersWithMissions = Array
-            //         .from(new Set<Tier>(railjackMissions.map(m => m.tier)))
-            //     embed = new Embed()
-            //         .setTitle(`Current Railjack Fissure Missions - ${Formatting.getPlatform(platform)}`)
-            //         .addFields(
-            //             tiersWithMissions.sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
-            //                 return {
-            //                     name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
-            //                     value: data
-            //                         .filter(m => m.tier === t)
-            //                         .filter(m => m.isStorm)
-            //                         .map(m => displayMission(m))
-            //                         .join('\n')
-            //                 }
-            //             })
-            //         )
-                
-            //     break;
-
-            // Summary of fissures
-            case 'Summary':
-            default:
-                embed = new Embed()
-                    .setTitle(`Current Fissure Missions Summary - ${Formatting.getPlatform(platform)}`)
-                    .setDescription('To see the available missions for a chosen fissure tier, use the select menu below.')
-                    .addFields(
-                        (['Lith', 'Meso', 'Neo', 'Axi', 'Requiem'] as Tier[]).sort((a, b) => TierNum[a] - TierNum[b]).map(t => {
-                            return {
-                                name: `${Formatting.getCustomEmoji(this.client, t)} ${t}`,
-                                value: `**${data.filter(m => m.tier === t).length}** available mission${data.filter(m => m.tier === t).length === 1 ? '' : 's'}`,
-                                inline: true
-                            }
-                        })
-                    )
-                    .addField('‎', '‎', true) // Has invisible characters
-                break;
-        }
+        let data: Fissures[] = await API.query(`${platform}/fissures`)
 
         // Fulfil deferred interaction
-        let emojis = this.client.config.snowflakes.emoji
-
         interaction.followUp({
-            embeds: [embed],
+            embeds: [FissureCommandUtils.createEmbed(this.client, platform, tier, data)],
             components: [
                 new ActionRow()
                     .addComponent(
@@ -130,47 +55,59 @@ export default class extends Command {
                             .addSeveralOptions(
                                 new SelectMenuOption('Summary')
                                     .setDescription('Get basic information about fissures')
-                                    .setEmoji(emojis.relic),
-                                // new SelectMenuOption('Railjack', 'railjack')
-                                //     .setDescription('Search for all Railjack fissures')
-                                //     .setEmoji(emojis.railjack),
+                                    .setEmoji(this.client.config.snowflakes.emoji.relic),
                                 new SelectMenuOption('Lith')
                                     .setDescription('Search for all Lith fissures')
-                                    .setEmoji(emojis.lith),
+                                    .setEmoji(this.client.config.snowflakes.emoji.lith),
                                 new SelectMenuOption('Meso')
                                     .setDescription('Search for all Meso fissures')
-                                    .setEmoji(emojis.meso),
+                                    .setEmoji(this.client.config.snowflakes.emoji.meso),
                                 new SelectMenuOption('Neo')
                                     .setDescription('Search for all Neo fissures')
-                                    .setEmoji(emojis.neo),
+                                    .setEmoji(this.client.config.snowflakes.emoji.neo),
                                 new SelectMenuOption('Axi')
                                     .setDescription('Search for all Axi fissures')
-                                    .setEmoji(emojis.axi),
+                                    .setEmoji(this.client.config.snowflakes.emoji.axi),
                                 new SelectMenuOption('Requiem')
                                     .setDescription('Search for all Requiem fissures')
-                                    .setEmoji(emojis.requiem)
+                                    .setEmoji(this.client.config.snowflakes.emoji.requiem)
                             )
                     )
             ]
         })
     }
+}
 
-    static async update(client: Client, interaction: SelectMenuInteraction, platform: Platform, tier: TierOption) {
+export class FissureCommandUtils {
+    /**
+     * Update a fissure embed with new tier data.
+     */
+    public static async update(client: Client, interaction: SelectMenuInteraction, platform: Platform, tier: TierOption) {
         // Get data relevant to platform
         let data: Fissures[] = await API.query(`${platform}/fissures`)
 
-        // Create embed relevant to selection
-        const displayMission = (mission: Fissures) => {
-            return [
-                mission.isStorm
-                    ? `${Formatting.getCustomEmoji(client, mission.enemy)} ${Formatting.getCustomEmoji(client, 'railjack')} **${mission.missionType} (${mission.enemy} Railjack)**`
-                    : `${Formatting.getCustomEmoji(client, mission.enemy)} **${mission.missionType} (${mission.enemy})**`,
-                `Located at **${mission.node}** for **${Formatting.humaniseTimeTo(mission.expiry)}**`,
-                ''
-            ].join('\n')
-        }
+        // Fulfil deferred interaction
+        interaction.update({embeds: [this.createEmbed(client, platform, tier, data)]})
+    }
 
-        let embed: MessageEmbed;
+    /**
+     * Format a mission to be displayed as fissure mission.
+     */
+    public static displayMission(client: Client, mission: Fissures) {
+        return [
+            mission.isStorm
+                ? `${Formatting.getCustomEmoji(client, mission.enemy)} ${Formatting.getCustomEmoji(client, 'railjack')} **${mission.missionType} (${mission.enemy} Railjack)**`
+                : `${Formatting.getCustomEmoji(client, mission.enemy)} **${mission.missionType} (${mission.enemy})**`,
+            `Located at **${mission.node}** for **${Formatting.humaniseTimeTo(mission.expiry)}**`,
+            ''
+        ].join('\n')
+    }
+
+    /**
+     * Create an embed to display fissure data.
+     */
+    public static createEmbed(client: Client, platform: Platform, tier: TierOption, data: Fissures[]) {
+        let embed: MessageEmbed
 
         switch (tier) {
             // Specific fissures
@@ -184,7 +121,7 @@ export default class extends Command {
                     .setDescription(
                         data
                             .filter(m => m.tier === tier)
-                            .map(m => displayMission(m))
+                            .map(m => this.displayMission(client, m))
                             .join('\n')
                     )
                 
@@ -209,11 +146,6 @@ export default class extends Command {
                 break;
         }
 
-        // Fulfil deferred interaction
-        console.log(`updated ${platform} ${tier}`);
-        // (client.channels.cache.get(interaction.channelId!) as TextChannel)?.messages.cache.get(interaction.message.id)?.edit({embeds: [embed]}).then(() => {
-            
-        // })
-        interaction.update({embeds: [embed]})
+        return embed
     }
 }
